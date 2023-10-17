@@ -4,13 +4,13 @@ let main;
 let tocId;
 let headings;
 
-// Returns the heading level of the given 'heading' DOM element,
+// Return the heading level of the given 'heading' DOM element,
 // e.g. 3 for an H3 element.
 function heading_level(heading) {
     return parseInt(heading.tagName.slice(-1));
 }
 
-// Returns the list element (at the proper nesting level) to which the
+// Return the list element (at the proper nesting level) to which the
 // given 'heading' element belongs.
 function list_from_heading(heading, prev_heading, current_list) {
     let list = current_list;  // return value
@@ -54,8 +54,8 @@ function add_toc_link_for_heading(heading, list) {
     list.appendChild(list_item);
 }
 
-// The table of content is made of nested lists mirroring the headings
-// in the document.
+// The table of content is made of nested lists mirroring the hierarchy of
+// headings in the document.
 function build_toc() {
     // Add the top-level nested list
     const toc_element = document.querySelector(`#${tocId}`);
