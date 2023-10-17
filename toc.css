@@ -1,0 +1,54 @@
+/* Inspired by https://webdevtrick.com/dynamic-table-of-contents/ */
+body {
+    display: flex;
+    height: 100vh;
+    margin: 0;
+}
+
+main {
+    flex: 3 3 100%;
+    overflow: auto;
+    padding: 0rem 3rem;
+}
+
+nav {
+    flex: 1 1 300px;
+    font-family: 'Poppins', sans-serif;
+    margin: 0;
+    color: #333344;
+    line-height: 1.5em;
+    font-size: 0.9rem;
+    background-color: #333344;
+    min-width: 240px;
+    padding: 1rem;
+    overflow-y: auto;
+}
+
+nav a {
+    color: #eeeeff;
+    text-decoration: none;
+}
+
+nav .active {
+/*nav a:is(.top-intersects, .body-intersects, .bottom-intersects) {*/
+    color: #ff8888;
+}
+
+/*nav a:not(.active):hover {*/
+nav a:hover {
+        color: #eb8c39;
+}
+
+nav ul {
+    list-style: none;
+    padding-left: 1.25rem;
+}
+
+nav ul li::before {
+    content: "\2022";
+    color: #eeeeff;
+    font-weight: bold;
+    display: inline-block;
+    width: 1em;
+    margin-left: -1em;
+}
