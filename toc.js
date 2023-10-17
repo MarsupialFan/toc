@@ -1,3 +1,24 @@
+// The table of content (toc) is made of nested lists of links mirroring the
+// hierarchy of headings in the document. A toc link represents not just its
+// corresponding heading, but the entire section of the page between that
+// heading and the following one. Example:
+//
+//     TOC              Content
+//   link A ---------> <h1>A</h1>
+//                 |   Lorem
+//                 |   ipsum
+//                 +-- dolor
+//     Link B -------> <h2>B</h2>
+//       Link C -----> <h3>C</h3>
+//                 |   sit
+//                 |   amet,
+//                 |   consectetur
+//                 |   adipiscing
+//                 +-- elit,
+//   link D ---------> <h1>D</h1>
+//                 |   sed
+//                 +-- do
+
 "use strict";
 
 let main;
@@ -54,8 +75,6 @@ function add_toc_link_for_heading(heading, list) {
     list.appendChild(list_item);
 }
 
-// The table of content is made of nested lists mirroring the hierarchy of
-// headings in the document.
 function build_toc() {
     // Add the top-level nested list
     const toc_element = document.querySelector(`#${tocId}`);
@@ -76,43 +95,62 @@ function build_toc() {
 
 let active_link;  // !!!!!!!!!!       !!!!!!!!!!!!!!        !!!!!!!!!!!!!!!!  if we wrap the entire thing with a class and use an instance of it, then we can convert all the global variables into instance variables
 
-function highlight() {
+function find_active_heading() {
+    const viewport_height = window.innerHeight;
+
     // Loop over the headings to find the best one to highlight in the toc.
     // The heading links in the toc represent not just the actual headings
     // in the content of the page, but the entire content from this heading
     // until the next heading. Thus while the best heading highlight in the
     // toc is the first which intersects the viewport, there's some logic
     // which tries to fine tune the decision in corner cases.
-    let prev_heading;
+    let active_heading;  // return value
+    let last_heading_above_viewport;
     for (let heading of headings) {
-        //console.log(heading.getBoundingClientRect().top);
-        if (heading.getBoundingClientRect().bottom > 10) {
-            if (heading.getBoundingClientRect().top > window.innerHeight * 9 / 10) {
-                // The 'heading' is in the viewport, but at the very bottom.
-                // If it isn't the first heading we prefer to keep it
-                // highlighted.
-                if (!prev_heading) {
-                    break;    // !!!!!!!!       !!!!!!!!!!        !!!!!!!!!!!     !!!!!!!!!!!!!!!! why skip the highlight logic? we rely here on the fact that this can happen only as a result of scrolling, and therefore the prev heading is already active
-                              // !!!!!!!!       !!!!!!!!!!   this may fail if there's a lot of text before the first heading, the viewport is at the bottom of the doc, and we scroll up
-                }
-                heading = prev_heading;
-            }
+        const heading_top = heading.getBoundingClientRect().top;
+        const heading_bottom = heading.getBoundingClientRect().bottom;
 
-            // Set the toc link corresponding to 'heading' as the new
-            // active link.
-            const id = heading.id;
-            //console.log("ID found: " + id);
-            const link = document.querySelector("#" + id + "-link");
-            //console.log("Link: " + link);
-            if (active_link) {
-                active_link.classList.remove("active");
-            }
-            link.classList.add("active");
-            active_link = link;
-            break;
+        if (heading_bottom <= 10) {
+            // 'heading' is (almost) entirely above the viewport, so the
+            // document section it represents may be in the viewport.
+            last_heading_above_viewport = heading;
+            continue;
         }
-        prev_heading = heading;
-    };
+
+        // If we reach here then 'heading' is either in or below the viewport.
+
+        if (last_heading_above_viewport && heading_top > viewport_height * 9 / 10) {
+            active_heading = last_heading_above_viewport;
+        } else if (heading_top < viewport_height - 10) {
+            active_heading = heading;
+        } else {
+            // This heading is (almost entirely) below the viewport. Any subsequent
+            // headings must fall into the same category, so there's no point to
+            // continue looping.
+        }
+        break;
+    }
+
+    return active_heading;
+}
+
+function highlight() {
+    const heading = find_active_heading();
+    if (active_link) {
+        active_link.classList.remove("active");
+        active_link = null;
+    }
+
+    if (heading) {
+        // Set the toc link corresponding to 'heading' as the new
+        // active link.
+        const id = heading.id;
+        //console.log("ID found: " + id);
+        const link = document.querySelector("#" + id + "-link");
+        //console.log("Link: " + link);
+        link.classList.add("active");
+        active_link = link;
+    }
 }
 
 export default function add_toc(main_tag = "main", nav_id = "toc") {
