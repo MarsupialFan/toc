@@ -131,6 +131,12 @@ function find_active_heading() {
         break;
     }
 
+    // Cover the case of a last heading which has scrolled off the top of the
+    // viewport.
+    if (last_heading_above_viewport && !active_heading) {
+        active_heading = last_heading_above_viewport;
+    }
+
     return active_heading;
 }
 
