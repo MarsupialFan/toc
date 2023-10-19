@@ -54,14 +54,13 @@ function list_from_heading(heading, prev_heading, current_list) {
     return list;
 }
 
-function set_heading_id(element, appendedId) {
-    if (!element.id) {  // !!!!!!!!       !!!!!!!!!!        !!!!!!!!!!!        !!!!!!!!!!!!!!      !!!!!!!!!!!!    can we use some other attribute, not id? E.g. toc_id
+function set_heading_id(element, unique_id) {
+    if (!element.id) {
         element.id = `${element.innerHTML
             .replace(/[^a-zA-Z ]/g, "")
             .trim()
-            .toLowerCase()
             .split(" ")
-            .join("-")}-${appendedId}`;
+            .join("-")}-${unique_id}`;
     }
 }
 
@@ -86,14 +85,14 @@ function build_toc() {
     let prev_heading;
     let current_list = top_level_list;
     headings.forEach((heading, index) => {
-        set_heading_id(heading, index);  // !!!!!!!!       !!!!!!!!!!        !!!!!!!!!!!  why isn't index enough for uniqueness?  e.g. 'toc-<index>'  But it's nice for the link to encode the heading, it makes it more visible
+        set_heading_id(heading, index);
         current_list = list_from_heading(heading, prev_heading, current_list);
         add_toc_link_for_heading(heading, current_list);
         prev_heading = heading;
     });
 }
 
-let active_link;  // !!!!!!!!!!       !!!!!!!!!!!!!!        !!!!!!!!!!!!!!!!  if we wrap the entire thing with a class and use an instance of it, then we can convert all the global variables into instance variables
+let active_link;
 
 function find_active_heading() {
     const viewport_height = window.innerHeight;
