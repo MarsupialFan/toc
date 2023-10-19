@@ -101,26 +101,30 @@ function find_active_heading() {
     // Loop over the headings to find the best one to highlight in the toc.
     // The heading links in the toc represent not just the actual headings
     // in the content of the page, but the entire content from this heading
-    // until the next heading. Thus while the best heading highlight in the
-    // toc is the first which intersects the viewport, there's some logic
+    // until the next heading. Thus while the best heading to highlight in
+    // the toc is the first which intersects the viewport, there's some logic
     // which tries to fine tune the decision in corner cases.
     let active_heading;  // return value
-    let last_heading_above_viewport;
+    let prev_heading;
     for (let heading of headings) {
         const heading_top = heading.getBoundingClientRect().top;
         const heading_bottom = heading.getBoundingClientRect().bottom;
 
         if (heading_bottom <= 10) {
-            // 'heading' is (almost) entirely above the viewport, so the
-            // document section it represents may be in the viewport.
-            last_heading_above_viewport = heading;
+            // 'heading' is either entirely or almost entirely above the
+            // viewport, so the document section it represents may be in the
+            // viewport. To determine whether it is or isn't we need to check
+            // the following heading.
+            prev_heading = heading;
             continue;
         }
 
         // If we reach here then 'heading' is either in or below the viewport.
 
-        if (last_heading_above_viewport && heading_top > viewport_height * 9 / 10) {
-            active_heading = last_heading_above_viewport;
+        if (prev_heading && heading_top > viewport_height * 9 / 10) {
+            // 'heading' is at the very bottom of the viewport so we prefer
+            // to set the previous one as active.
+            active_heading = prev_heading;
         } else if (heading_top < viewport_height - 10) {
             active_heading = heading;
         } else {
@@ -133,8 +137,8 @@ function find_active_heading() {
 
     // Cover the case of a last heading which has scrolled off the top of the
     // viewport.
-    if (last_heading_above_viewport && !active_heading) {
-        active_heading = last_heading_above_viewport;
+    if (prev_heading && !active_heading) {
+        active_heading = prev_heading;
     }
 
     return active_heading;
