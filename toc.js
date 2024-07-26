@@ -143,6 +143,20 @@ function find_active_heading() {
     return active_heading;
 }
 
+function ensure_element_is_visible(element) {
+    const element_top = element.getBoundingClientRect().top;
+    if (element_top <= 10) {
+        element.scrollIntoView(true);
+        return;
+    }
+
+    const element_bottom = element.getBoundingClientRect().bottom;
+    const viewport_height = window.innerHeight;
+    if (element_bottom >= viewport_height) {
+        element.scrollIntoView(false)
+    }
+}
+
 function highlight() {
     const heading = find_active_heading();
     if (active_link) {
@@ -159,6 +173,7 @@ function highlight() {
         //console.log("Link: " + link);
         link.classList.add("active");
         active_link = link;
+        ensure_element_is_visible(link);
     }
 }
 
